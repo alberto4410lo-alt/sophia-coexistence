@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>SophIA Coexistence</title>
+</head>
+
+<body>
+
+<button onclick="launchWhatsAppSignup()">
+  Conectar WhatsApp Business
+</button>
+
+<script>
+  window.fbAsyncInit = function() {
+    FB.init({
+      appId: '1070261032081890',
+      autoLogAppEvents: true,
+      xfbml: true,
+      version: 'v26.0'
+    });
+  };
+</script>
+
+<script async defer crossorigin="anonymous"
+  src="https://connect.facebook.net/en_US/sdk.js">
+</script>
+
+<script>
+function launchWhatsAppSignup() {
+  FB.login(function(response) {
+    console.log(response);
+  }, {
+    config_id: '2255542371959234',
+    response_type: 'code',
+    override_default_response_type: true,
+    extras: {
+      setup: {}
+    }
+  });
+}
+</script>
+
+</body>
+</html>
