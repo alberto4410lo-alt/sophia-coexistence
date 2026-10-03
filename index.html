@@ -2,43 +2,149 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>SophIA Coexistence</title>
+  <title>SophIA Coexistence - Diagnóstico</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+
+    button {
+      padding: 14px 22px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    #diagnostico {
+      margin-top: 25px;
+      padding: 15px;
+      background: #f3f3f3;
+      border: 1px solid #ccc;
+      white-space: pre-wrap;
+      word-break: break-word;
+      min-height: 100px;
+    }
+  </style>
 </head>
 
 <body>
+
+<h2>SophIA Coexistence</h2>
 
 <button onclick="launchWhatsAppSignup()">
   Conectar WhatsApp Business
 </button>
 
+<div id="diagnostico">
+Esperando prueba...
+</div>
+
 <script>
-  window.fbAsyncInit = function() {
-    FB.init({
-      appId: '1070261032081890',
-      autoLogAppEvents: true,
-      xfbml: true,
-      version: 'v26.0'
-    });
-  };
+function mostrar(mensaje, datos) {
+  const panel = document.getElementById('diagnostico');
+
+  let salida = mensaje;
+
+  if (datos !== undefined) {
+    try {
+      salida += "\n" + JSON.stringify(datos, null, 2);
+    } catch (e) {
+      salida += "\n" + String(datos);
+    }
+  }
+
+  panel.textContent += "\n\n" + salida;
+  console.log(mensaje, datos);
+}
+
+
+/* ESCUCHAR EVENTOS DE EMBEDDED SIGNUP */
+window.addEventListener('message', function(event) {
+
+  if (
+    event.origin !== 'https://www.facebook.com' &&
+    event.origin !== 'https://web.facebook.com'
+  ) {
+    return;
+  }
+
+  let data = event.data;
+
+  try {
+    if (typeof data === 'string') {
+      data = JSON.parse(data);
+    }
+  } catch (e) {
+    mostrar('Evento recibido sin formato JSON', event.data);
+    return;
+  }
+
+  mostrar('EVENTO DE META RECIBIDO:', data);
+});
+
+
+/* INICIALIZAR FACEBOOK SDK */
+window.fbAsyncInit = function() {
+
+  FB.init({
+    appId: '1070261032081890',
+    autoLogAppEvents: true,
+    xfbml: true,
+    version: 'v26.0'
+  });
+
+  mostrar('Facebook SDK cargado correctamente.');
+};
 </script>
 
-<script async defer crossorigin="anonymous"
+
+<script
+  async
+  defer
+  crossorigin="anonymous"
   src="https://connect.facebook.net/en_US/sdk.js">
 </script>
 
+
 <script>
 function launchWhatsAppSignup() {
+
+  document.getElementById('diagnostico').textContent =
+    'Iniciando Embedded Signup...';
+
   FB.login(function(response) {
-    console.log(response);
+
+    mostrar('RESPUESTA FINAL DE FB.login():', response);
+
+    if (response && response.authResponse) {
+
+      if (response.authResponse.code) {
+        mostrar('RESULTADO: Meta devolvió authorization code.');
+      } else {
+        mostrar('RESULTADO: Existe authResponse pero no authorization code.');
+      }
+
+    } else {
+      mostrar('RESULTADO: FB.login terminó sin authResponse.');
+    }
+
   }, {
+
     config_id: '2255542371959234',
+
     response_type: 'code',
+
     override_default_response_type: true,
+
     extras: {
       setup: {},
       featureType: 'whatsapp_business_app_onboarding',
-  sessionInfoVersion: '3'
+      sessionInfoVersion: '3'
     }
+
   });
 }
 </script>
